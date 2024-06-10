@@ -11,7 +11,7 @@ import { getEmbeddings } from "./embeddings";
 import { convertToAscii } from "./utils";
 
 export const getPineconeClient = () => {
-  return new Pinecone({
+  return new Pinecone({ 
     apiKey: process.env.PINECONE_API_KEY!,
   });
 };
@@ -24,22 +24,19 @@ type PDFPage = {
 };
 
 export async function loadFirebaseIntoPinecone(fileKey: string) {
-  console.log("downloading from Firebase Storage into memory");
   const { buffer, file_name } = await downloadFromFirebase(fileKey);
   if (!buffer || !file_name) {
     throw new Error("could not download from firebase");
   }
-  console.log("loading pdf into memory" + file_name);
   const blob = new Blob([buffer], { type: "application/pdf" });
 
   const loader = new PDFLoader(blob);
-
   const pages = (await loader.load()) as PDFPage[];
   const documents = await Promise.all(pages.map(prepareDocument));
 
   const vectors = await Promise.all(documents.flat().map(embedDocument));
   const client = await getPineconeClient();
-  const pineconeIndex = await client.index(
+  const pineconeIndex = client.index(
     process.env.PINECONE_INDEX || "chatpdf-ai"
   );
   const namespace = pineconeIndex.namespace(convertToAscii(fileKey));

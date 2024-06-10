@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React,{useState} from "react";
 import { useDropzone } from "react-dropzone";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -10,7 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 
 function FileUpload() {
   const router = useRouter();
-  const [uploading, setUploading] = React.useState(false);
+  const [uploading, setUploading] = useState(false);
   const { mutate, isPending } = useMutation({
     mutationFn: async ({
       file_key,
@@ -22,8 +22,7 @@ function FileUpload() {
       const response = await axios.post("/api/create-chat", {
         file_key,
         file_name,
-      });
-      console.log(response.data)
+      }); 
       return response.data;
     },
   });
@@ -46,7 +45,6 @@ function FileUpload() {
         mutate(data, {
           onSuccess: ({ chat_id }) => {
             toast.success("Chat created!");
-            console.log({chat_id});
             router.push(`/chat/${chat_id}`);
           },
           onError: (err) => {
@@ -55,6 +53,7 @@ function FileUpload() {
           },
         });
       } catch (error) {
+        toast.error("Error creating chat");
         console.log(error);
       } finally {
         setUploading(false);

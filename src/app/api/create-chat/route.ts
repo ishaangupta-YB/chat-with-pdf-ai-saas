@@ -5,17 +5,15 @@ import { loadFirebaseIntoPinecone } from "@/lib/pinecone";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request, res: NextResponse) {
+export async function POST(req: Request) {
   const { userId } = auth();
   if (!userId) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-
   try {
     const body = await req.json();
-    const { file_key, file_name } = body;
+    const { file_key, file_name } = body; 
     const pages = await loadFirebaseIntoPinecone(file_key);
-    console.log(pages);
     const pdfUrl = await getFirebaseStorageUrl(file_key);
     const chat_id = await db
       .insert(chats)
